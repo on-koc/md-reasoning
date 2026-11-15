@@ -82,6 +82,26 @@ completion_models:
     concurrency: 16
 ```
 
+## Output format vs. GraphRAG 2.x
+
+The tables are exactly what GraphRAG 3.3's own `graphrag index` writes (same columns, ids and
+values for the same input). Compared with GraphRAG **2.4.0** (verified by indexing the same corpus
+with both versions):
+
+| Output | Change in 3.x |
+|---|---|
+| `documents.parquet` | `metadata` column renamed to `raw_data` |
+| `text_units.parquet` | `document_ids` (list) replaced by `document_id` (string); ids and `n_tokens` differ (chunking now uses `o200k_base` instead of `cl100k_base`) |
+| `entities.parquet` | `x`, `y` (UMAP layout, `0.0`/NaN unless UMAP was enabled) removed |
+| `relationships.parquet` | same columns; `source`/`target` may be swapped for some edges (3.x keeps the LLM's order) |
+| `communities.parquet`, `community_reports.parquet` | same columns; community membership can differ (new Leiden implementation) |
+| `output/lancedb/` | tables renamed (`default-entity-description` -> `entity_description`, ...); columns `id, text, vector, attributes` -> `id, vector` + date fields |
+| all parquet files | strings stored as Arrow `large_string` instead of `string` (transparent for pandas / polars / DuckDB) |
+
+Entity / relationship / community ids are random UUIDs in both versions, so they never match
+across runs. Code written for 2.x outputs needs the column renames above; query code that reads
+the LanceDB tables directly needs adapting.
+
 ## Notes
 
 * GraphRAG's CLI (`graphrag index/query/prompt-tune`) does not know the `local` type. Use these

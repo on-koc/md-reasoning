@@ -191,22 +191,38 @@ def build_overrides(settings: Settings, vector_size: int) -> dict[str, Any]:
 
 
 def documents_frame(docs: list[Document]):
+    """The ``documents`` table in the exact shape GraphRAG's own input reader produces."""
     import pandas as pd
 
-    now = datetime.now(timezone.utc).isoformat()
     return pd.DataFrame(
         [
             {
-                "id": d.id,
+                "id": graphrag_doc_id(d),
                 "human_readable_id": i,
                 "title": doc_title(d),
                 "text": d.text,
-                "creation_date": now,
+                "creation_date": creation_date(d),
                 "raw_data": None,
             }
             for i, d in enumerate(docs)
         ]
     )
+
+
+def graphrag_doc_id(doc: Document) -> str:
+    """GraphRAG's document id: SHA-512 of the text (as in GraphRAG 2.x and 3.x).
+    Explicit ids from JSON/CSV records (``input.id_field``) are kept."""
+    if doc.id.startswith("doc-"):  # content-derived id from rag_common
+        from graphrag_input.hashing import gen_sha512_hash
+
+        return gen_sha512_hash({"text": doc.text}, ["text"])
+    return doc.id
+
+
+def creation_date(doc: Document) -> str:
+    """Source-file ctime in GraphRAG's format, e.g. ``2025-07-15 09:30:00 +0000``."""
+    ts = datetime.fromtimestamp(doc.created, tz=timezone.utc) if doc.created else datetime.now(timezone.utc)
+    return ts.astimezone().strftime("%Y-%m-%d %H:%M:%S %z")
 
 
 def doc_title(doc: Document) -> str:
@@ -230,7 +246,7 @@ def new_documents_for_update(docs: list[Document], output_dir: Path) -> list[Doc
     known_ids, known_titles = set(previous["id"]), set(previous["title"])
     new, changed = [], []
     for doc in docs:
-        if doc.id in known_ids:
+        if graphrag_doc_id(doc) in known_ids:
             continue
         if doc_title(doc) in known_titles:
             changed.append(doc_title(doc))

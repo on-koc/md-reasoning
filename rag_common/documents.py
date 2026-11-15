@@ -35,6 +35,8 @@ class Document:
     title: str = ""
     source: str = ""
     metadata: dict[str, Any] = field(default_factory=dict)
+    created: float | None = None
+    """POSIX timestamp (ctime) of the source file, if the document came from a file."""
 
 
 def content_id(text: str, prefix: str = "doc-") -> str:
@@ -109,7 +111,8 @@ def load_documents(
         rel = str(file.relative_to(base))
         if suffix in TEXT_SUFFIXES:
             text = file.read_text(encoding=encoding, errors="replace")
-            if _add(Document(id=content_id(text), text=text, title=file.stem, source=rel)):
+            doc = Document(id=content_id(text), text=text, title=file.stem, source=rel, created=file.stat().st_ctime)
+            if _add(doc):
                 break
         elif suffix in RECORD_SUFFIXES:
             records = _records_from_csv(file, encoding) if suffix in (".csv", ".tsv") else _records_from_json(file, encoding)
@@ -132,6 +135,7 @@ def load_documents(
                     title=title,
                     source=f"{rel}#{i}",
                     metadata=meta,
+                    created=file.stat().st_ctime,
                 )
                 if _add(doc):
                     stop = True
