@@ -1,0 +1,19 @@
+# indexes produced by the scripts
+output/
+*/output/
+
+# virtual environments
+.venv/
+.venvs/
+venv/
+
+# python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+
+# secrets / local overrides
+.env
+*.local.yaml

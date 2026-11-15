@@ -1,0 +1,24 @@
+# HippoRAG 2 runtime dependencies (Python >= 3.10). Tested with hipporag 2.0.0a4.
+#
+# The hipporag wheel itself pins torch==2.5.1 / vllm==0.6.6 / transformers==4.45.2
+# (CUDA-only, Python <= 3.12). Our adapter does not need vLLM, so install the
+# package WITHOUT its pins after this file:
+#
+#   pip install -r hipporag2/requirements.txt
+#   pip install --no-deps hipporag==2.0.0a4
+#
+# Missing optional modules (vllm, gritlm, boto3, litellm) are replaced by stubs at runtime.
+-r ../requirements-common.txt
+torch>=2.1                # imported by hipporag at import time
+transformers>=4.45
+python-igraph>=0.11
+networkx>=3.0
+pandas>=2.0
+pyarrow>=14
+pydantic>=2.0
+tenacity>=8.0
+filelock>=3.0
+httpx>=0.25
+einops
+tqdm
+# For `provider: huggingface` embeddings also install:  sentence-transformers>=3.0

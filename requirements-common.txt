@@ -1,0 +1,7 @@
+# Shared by every method (rag_common): config handling + the openai / ollama providers.
+pyyaml>=6.0
+numpy>=1.24
+openai>=1.40        # OpenAI-compatible provider (vLLM, SGLang, llama.cpp, LM Studio, TGI, ...)
+ollama>=0.5         # Ollama native provider
+tiktoken>=0.7
+json-repair>=0.30   # repairs slightly malformed JSON from small local models

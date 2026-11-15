@@ -1,0 +1,26 @@
+# Ollama native API (https://ollama.com) for both the LLM and the embeddings.
+#   ollama pull qwen2.5:7b-instruct && ollama pull bge-m3
+# Use with any method:  python <method>/index.py -m configs/ollama.yaml
+
+llm:
+  provider: ollama
+  model: qwen2.5:7b-instruct      # e.g. qwen2.5:14b-instruct, llama3.1:8b, mistral-nemo, qwen3:8b
+  base_url: http://localhost:11434
+  temperature: 0.0
+  max_tokens: 4096
+  num_ctx: 32768                  # IMPORTANT: Ollama's default context is far too small
+  concurrency: 4                  # match OLLAMA_NUM_PARALLEL on the server
+  timeout: 900
+  # think: false                  # disable thinking for reasoning models (qwen3, deepseek-r1, ...)
+  # keep_alive: 30m
+  # options: {num_gpu: 99}
+
+embedding:
+  provider: ollama
+  model: bge-m3                   # e.g. nomic-embed-text, mxbai-embed-large, snowflake-arctic-embed2
+  base_url: http://localhost:11434
+  batch_size: 32
+  concurrency: 4
+  # nomic-embed-text expects task prefixes:
+  # query_prefix: "search_query: "
+  # document_prefix: "search_document: "

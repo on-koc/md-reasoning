@@ -1,0 +1,4 @@
+# Microsoft GraphRAG 3.x (Python 3.11 - 3.13). Tested with graphrag 3.3.0.
+-r ../requirements-common.txt
+graphrag>=3.3,<4
+# For `provider: huggingface` also install:  -r ../requirements-hf.txt
