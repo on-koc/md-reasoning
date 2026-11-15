@@ -1,0 +1,51 @@
+# Microsoft GraphRAG indexing with local models.
+# Relative paths are resolved against this file's directory.
+# Swap the model sections with a profile:  python ms_graphrag/index.py -m configs/vllm.yaml
+
+input:
+  path: ../data/sample            # file or directory
+  patterns: ["*.md", "*.markdown", "*.txt", "*.json", "*.jsonl", "*.csv"]
+  recursive: true
+  text_field: text                # field names for .json / .jsonl / .csv records
+  title_field: title
+  id_field: id
+
+# GraphRAG project root (settings.yaml, prompts/, output/, cache/, logs/)
+output_dir: ./output/graphrag_project
+
+llm:
+  provider: ollama                # huggingface | openai | ollama
+  model: qwen2.5:7b-instruct
+  base_url: http://localhost:11434
+  temperature: 0.0
+  max_tokens: 4096
+  num_ctx: 32768                  # Ollama context window (community reports need >= 16k)
+  concurrency: 4                  # parallel requests; also used as GraphRAG concurrent_requests
+  timeout: 600
+
+embedding:
+  provider: ollama
+  model: bge-m3
+  base_url: http://localhost:11434
+  batch_size: 32
+
+graphrag:
+  method: standard                # standard = LLM graph extraction | fast = NLP extraction + LLM reports
+  max_retries: 5                  # GraphRAG retry middleware (also re-asks on invalid JSON)
+  encoding_model: o200k_base      # tiktoken encoding used for token budgeting
+  # Any GraphRAG setting (https://microsoft.github.io/graphrag/config/yaml/),
+  # merged over the project's settings.yaml on every run:
+  settings:
+    chunking:
+      size: 1200
+      overlap: 100
+    extract_graph:
+      entity_types: [organization, person, geo, event]
+      max_gleanings: 1            # extra "did you miss anything?" passes (0 = faster)
+    summarize_descriptions:
+      max_length: 500
+    community_reports:
+      max_length: 2000
+      max_input_length: 8000
+    extract_claims:
+      enabled: false

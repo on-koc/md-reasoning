@@ -1,0 +1,22 @@
+# Ollama through its OpenAI-compatible endpoint (http://localhost:11434/v1)
+# using the `openai` Python package. Note: the context size cannot be set per
+# request on this endpoint - create a model with a larger context instead, e.g.
+#   printf 'FROM qwen2.5:7b-instruct\nPARAMETER num_ctx 32768\n' > Modelfile
+#   ollama create qwen2.5-32k -f Modelfile
+
+llm:
+  provider: openai
+  model: qwen2.5-32k
+  base_url: http://localhost:11434/v1
+  api_key: ollama                 # any non-empty string
+  temperature: 0.0
+  max_tokens: 4096
+  concurrency: 4
+  timeout: 900
+
+embedding:
+  provider: openai
+  model: bge-m3
+  base_url: http://localhost:11434/v1
+  api_key: ollama
+  batch_size: 32

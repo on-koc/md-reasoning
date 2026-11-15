@@ -1,0 +1,48 @@
+# LightRAG indexing with local models.
+# Relative paths are resolved against this file's directory.
+# Swap the model sections with a profile:  python lightrag/index.py -m configs/vllm.yaml
+
+input:
+  path: ../data/sample
+  patterns: ["*.md", "*.markdown", "*.txt", "*.json", "*.jsonl", "*.csv"]
+  recursive: true
+  text_field: text
+  title_field: title
+  id_field: id
+
+# LightRAG working_dir (kv_store_*.json, vdb_*.json, graph_chunk_entity_relation.graphml, ...)
+output_dir: ./output/lightrag_storage
+
+llm:
+  provider: ollama                # huggingface | openai | ollama
+  model: qwen2.5:7b-instruct
+  base_url: http://localhost:11434
+  temperature: 0.0
+  max_tokens: 4096
+  num_ctx: 32768                  # LightRAG recommends >= 32k context
+  concurrency: 4                  # -> llm_model_max_async
+  timeout: 600
+
+embedding:
+  provider: ollama
+  model: bge-m3
+  base_url: http://localhost:11434
+  batch_size: 32                  # -> embedding_batch_num
+  max_tokens: 8192                # -> EmbeddingFunc.max_token_size
+
+# Passed straight to LightRAG(...) - any constructor argument is allowed.
+# working_dir / llm_model_func / embedding_func are filled in by index.py.
+lightrag:
+  chunk_token_size: 1200
+  chunk_overlap_token_size: 100
+  entity_extract_max_gleaning: 1
+  entity_extraction_use_json: false   # true = JSON-mode extraction (often better for small models)
+  max_parallel_insert: 2              # documents processed in parallel
+  enable_llm_cache: true
+  addon_params:
+    language: English
+  # Storage backends (defaults shown):
+  # kv_storage: JsonKVStorage
+  # vector_storage: NanoVectorDBStorage
+  # graph_storage: NetworkXStorage
+  # doc_status_storage: JsonDocStatusStorage

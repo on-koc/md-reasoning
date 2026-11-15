@@ -1,0 +1,45 @@
+# HippoRAG 2 indexing with local models.
+# Relative paths are resolved against this file's directory.
+# Swap the model sections with a profile:  python hipporag2/index.py -m configs/vllm.yaml
+
+input:
+  path: ../data/sample
+  patterns: ["*.md", "*.markdown", "*.txt", "*.json", "*.jsonl", "*.csv"]
+  recursive: true
+  text_field: text                # HippoRAG corpora ([{"title": ..., "text": ...}]) work as-is
+  title_field: title
+  id_field: id
+
+# HippoRAG save_dir; the index lands in <output_dir>/<llm>_<embedding>/
+output_dir: ./output/hipporag_outputs
+
+llm:
+  provider: ollama                # huggingface | openai | ollama
+  model: qwen2.5:7b-instruct
+  base_url: http://localhost:11434
+  temperature: 0.0
+  max_tokens: 2048                # -> BaseConfig.max_new_tokens
+  num_ctx: 16384
+  concurrency: 4
+  timeout: 600
+
+embedding:
+  provider: ollama
+  model: bge-m3
+  base_url: http://localhost:11434
+  batch_size: 32
+  # Used for HippoRAG's instruction-style *query* embeddings at retrieval time:
+  query_instruction_template: "Instruct: {instruction}\nQuery: "
+
+hipporag:
+  # --- passage chunking done by index.py (HippoRAG indexes passages as given) ---
+  chunk_token_size: 512           # 0 / null = one passage per document
+  chunk_overlap_token_size: 64
+  chunk_by: token                 # token (tiktoken) | word
+  prepend_title: true             # "title\npassage" like the HippoRAG benchmark corpora
+  # --- any HippoRAG BaseConfig field (hipporag/utils/config_utils.py) ---
+  synonymy_edge_sim_threshold: 0.8
+  synonymy_edge_topk: 2047
+  passage_node_weight: 0.05
+  is_directed_graph: false
+  save_openie: true

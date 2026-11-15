@@ -1,0 +1,8 @@
+# Optional: the in-process Hugging Face provider (llm/embedding `provider: huggingface`).
+# Install the torch build matching your CUDA version first if needed:
+#   https://pytorch.org/get-started/locally/
+torch>=2.1
+transformers>=4.45
+sentence-transformers>=3.0
+accelerate>=0.30    # device: auto (spread a large model over all GPUs)
+# bitsandbytes      # llm.quantization: 4bit | 8bit

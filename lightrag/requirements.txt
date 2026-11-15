@@ -1,0 +1,4 @@
+# LightRAG (Python >= 3.10). Tested with lightrag-hku 1.5.7.
+-r ../requirements-common.txt
+lightrag-hku>=1.5,<2
+# For `provider: huggingface` also install:  -r ../requirements-hf.txt

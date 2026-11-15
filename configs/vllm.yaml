@@ -1,0 +1,28 @@
+# OpenAI-compatible servers through the `openai` Python package.
+# Example with vLLM (one server per model):
+#   vllm serve Qwen/Qwen2.5-7B-Instruct --port 8000 --max-model-len 32768
+#   vllm serve BAAI/bge-m3 --port 8001 --task embed        # (newer vLLM: --runner pooling)
+# The same profile works for SGLang, llama.cpp (llama-server --embeddings),
+# LM Studio (http://localhost:1234/v1), TGI / TEI, LocalAI, or Ollama's /v1 endpoint:
+# just change base_url / model.
+
+llm:
+  provider: openai
+  model: Qwen/Qwen2.5-7B-Instruct # the name the server registered (GET /v1/models)
+  base_url: http://localhost:8000/v1
+  api_key: ${OPENAI_API_KEY:-not-needed}
+  temperature: 0.0
+  max_tokens: 4096
+  concurrency: 16                 # vLLM batches concurrent requests efficiently
+  timeout: 900
+  structured_output: auto         # json_schema -> json_object -> prompt-only, negotiated automatically
+  # For reasoning models served by vLLM/SGLang, disable thinking via the chat template:
+  # extra_body: {chat_template_kwargs: {enable_thinking: false}}
+
+embedding:
+  provider: openai
+  model: BAAI/bge-m3
+  base_url: http://localhost:8001/v1
+  api_key: ${OPENAI_API_KEY:-not-needed}
+  batch_size: 64
+  concurrency: 4
